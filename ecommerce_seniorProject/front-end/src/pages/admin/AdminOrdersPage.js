@@ -28,7 +28,7 @@ const AdminOrdersPage = () => {
               <td>2022-09-12</td>
               <td>$123</td>
               <td>
-                <i class="bi bi-check-lg text-success"></i>
+                <i className="bi bi-check-lg text-success"></i>
               </td>
               <td>Paypal</td>
               <td>
@@ -41,7 +41,7 @@ const AdminOrdersPage = () => {
               <td>2022-09-12</td>
               <td>$123</td>
               <td>
-                <i class="bi bi-x-lg text-danger"></i>
+                <i className="bi bi-x-lg text-danger"></i>
               </td>
               <td>Cash on delivery</td>
               <td>

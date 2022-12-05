@@ -40,7 +40,7 @@ const AdminProductsPage = () => {
               <td>
                 <LinkContainer to="/admin/edit-product">
                   <Button className="btn-sm">
-                    <i class="bi bi-pencil-square"></i>
+                    <i className="bi bi-pencil-square"></i>
                   </Button>
                 </LinkContainer>
                 {" / "}
@@ -49,7 +49,7 @@ const AdminProductsPage = () => {
                   className="btn-sm"
                   onClick={deleteHandler}
                 >
-                  <i class="bi bi-x-circle"></i>
+                  <i className="bi bi-x-circle"></i>
                 </Button>
               </td>
             </tr>
@@ -61,7 +61,7 @@ const AdminProductsPage = () => {
               <td>
                 <LinkContainer to="/admin/edit-product">
                   <Button className="btn-sm">
-                    <i class="bi bi-pencil-square"></i>
+                    <i className="bi bi-pencil-square"></i>
                   </Button>
                 </LinkContainer>
                 {" / "}
@@ -70,7 +70,7 @@ const AdminProductsPage = () => {
                   className="btn-sm"
                   onClick={deleteHandler}
                 >
-                  <i class="bi bi-x-circle"></i>
+                  <i className="bi bi-x-circle"></i>
                 </Button>
               </td>
             </tr>
