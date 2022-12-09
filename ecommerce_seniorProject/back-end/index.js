@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+app.use(express.json());
+
 const apiRoutes = require("./routes/apiRoutes");
 
 // mongodb connection
@@ -14,9 +16,16 @@ app.get("/", (req, res) => {
 
 app.use("/api", apiRoutes);
 
-app.use((error, req, res) => {
-  console.log(error);
+app.use((error, req, res, next) => {
   next(error);
+});
+
+app.use((error, req, res, next) => {
+  console.log(error);
+  res.status(500).json({
+    message: error.message,
+    stack: error.stack,
+  });
 });
 
 app.listen(port, () => {
