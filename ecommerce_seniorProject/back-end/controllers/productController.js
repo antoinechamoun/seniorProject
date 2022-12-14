@@ -1,6 +1,7 @@
 const Product = require("../models/ProductModel");
 const recordsPerPage = require("../config/pagination");
 const imageValidate = require("../utils/imageValidate");
+const { findOneAndUpdate } = require("../models/ProductModel");
 
 const getProducts = async (req, res, next) => {
   try {
@@ -246,6 +247,28 @@ const adminUpload = async (req, res, next) => {
   }
 };
 
+const adminDeleteProductImage = async (req, res, next) => {
+  try {
+    const imagePath = decodeURIComponent(req.params.imagePath);
+
+    const path = require("path");
+    const finalPath = path.resolve("../front-end/public") + imagePath;
+    const fs = require("fs");
+    fs.unlink(finalPath, (error) => {
+      if (error) {
+        res.status(500).send(error);
+      }
+    });
+    await Product.findOneAndUpdate(
+      { _id: req.params.productId },
+      { $pull: { images: { path: imagePath } } }
+    ).orFail();
+    res.end();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
@@ -255,4 +278,5 @@ module.exports = {
   adminCreateProduct,
   adminUpdateProduct,
   adminUpload,
+  adminDeleteProductImage,
 };
