@@ -4,7 +4,7 @@ const Product = require("../models/ProductModel");
 const { hashPassword, comparePasswords } = require("../utils/hashPassword");
 const generateAuthToken = require("../utils/generateAuthToken");
 
-const getUser = async (req, res, next) => {
+const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({}).select("-password");
     res.json(users);
@@ -155,6 +155,8 @@ const getUserProfile = async (req, res, next) => {
 
 const writeReview = async (req, res, next) => {
   try {
+    const session = await Review.startSession();
+
     const { comment, rating } = req.body;
     if (!(comment && rating)) {
       return res.status(400).send("All fields required");
@@ -162,25 +164,32 @@ const writeReview = async (req, res, next) => {
 
     const ObjectId = require("mongodb").ObjectId;
     let reviewId = ObjectId();
-    await Review.create([
-      {
-        _id: reviewId,
-        comment: comment,
-        rating: Number(rating),
-        user: {
-          _id: req.user._id,
-          name: req.user.name + " " + req.user.lastName,
+
+    session.startTransaction();
+    await Review.create(
+      [
+        {
+          _id: reviewId,
+          comment: comment,
+          rating: Number(rating),
+          user: {
+            _id: req.user._id,
+            name: req.user.name + " " + req.user.lastName,
+          },
         },
-      },
-    ]);
-    const product = await Product.findById(req.params.productId).populate(
-      "reviews"
+      ],
+      { session: session }
     );
+    const product = await Product.findById(req.params.productId)
+      .populate("reviews")
+      .session(session);
 
     const alreadyReviewed = product.reviews.find((r) => {
       return r.user._id.toString() === req.user._id.toString();
     });
     if (alreadyReviewed) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).send("You already reviewed this product");
     }
 
@@ -198,17 +207,58 @@ const writeReview = async (req, res, next) => {
           .reduce((sum, item) => sum + item, 0) / product.reviews.length;
     }
     await product.save();
+
+    await session.commitTransaction();
+    session.abortTransaction();
     res.send("Review Created");
+  } catch (error) {
+    await session.abortTransaction();
+    next(error);
+  }
+};
+
+const getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).orFail();
+    return res.send(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).orFail();
+
+    user.name = req.body.name || user.name;
+    user.lastName = req.body.lastName || user.lastName;
+    user.email = req.body.email || user.email;
+    user.isAdmin = req.body.isAdmin || user.isAdmin;
+    await user.save();
+    res.send("user updated");
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).orFail();
+    await user.remove();
+    res.send("User removed");
   } catch (error) {
     next(error);
   }
 };
 
 module.exports = {
-  getUser,
+  getUsers,
   registerUser,
   loginUser,
   updateUserProfile,
   getUserProfile,
   writeReview,
+  getUser,
+  updateUser,
+  deleteUser,
 };
