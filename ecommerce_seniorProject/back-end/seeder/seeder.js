@@ -13,6 +13,8 @@ const Review = require("../models/ReviewModel");
 const User = require("../models/UserModel");
 const Order = require("../models/OrderModel");
 
+console.log(process.argv);
+
 const importData = async () => {
   try {
     await Category.collection.dropIndexes();
@@ -24,19 +26,23 @@ const importData = async () => {
     await User.collection.deleteMany({});
     await Order.collection.deleteMany({});
 
-    await Category.insertMany(categoryData);
-    const reviews = await Review.insertMany(reviewData);
-    const sampleProducts = productData.map((product) => {
-      reviews.map((review) => {
-        product.reviews.push(review._id);
+    if (process.argv[2] !== "-d") {
+      await Category.insertMany(categoryData);
+      const reviews = await Review.insertMany(reviewData);
+      const sampleProducts = productData.map((product) => {
+        reviews.map((review) => {
+          product.reviews.push(review._id);
+        });
+        return { ...product };
       });
-      return { ...product };
-    });
-    await Product.insertMany(sampleProducts);
-    await User.insertMany(userData);
-    await Order.insertMany(orderData);
+      await Product.insertMany(sampleProducts);
+      await User.insertMany(userData);
+      await Order.insertMany(orderData);
 
-    console.log("seeder data proceeded successfully");
+      console.log("seeder data imported successfully");
+      process.exit();
+    }
+    console.log("seeder data deleted successfully");
     process.exit();
   } catch (error) {
     console.error(error);
