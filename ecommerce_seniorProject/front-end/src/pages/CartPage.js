@@ -9,7 +9,18 @@ const CartPage = () => {
           <h1>Shopping Cart</h1>
           <ListGroup variant="flush">
             {Array.from({ length: 3 }).map((_, id) => {
-              return <CartItemComponent key={id} />;
+              return (
+                <CartItemComponent
+                  item={{
+                    image: { path: "/images/card/card.png" },
+                    name: "product",
+                    price: 10,
+                    count: 10,
+                    quantity: 10,
+                  }}
+                  key={id}
+                />
+              );
             })}
           </ListGroup>
           <Alert variant="info">Your cart is empty</Alert>

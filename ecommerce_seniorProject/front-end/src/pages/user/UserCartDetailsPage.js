@@ -49,7 +49,18 @@ const UserCartDetailsPage = () => {
           <h3>Order items</h3>
           <ListGroup>
             {Array.from({ length: 3 }).map((_, id) => {
-              return <CartItemComponent key={id} />;
+              return (
+                <CartItemComponent
+                  item={{
+                    image: { path: "/images/card/card.png" },
+                    name: "product",
+                    price: 10,
+                    count: 10,
+                    quantity: 10,
+                  }}
+                  key={id}
+                />
+              );
             })}
           </ListGroup>
         </Col>
