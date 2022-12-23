@@ -13,7 +13,18 @@ import { Rating } from "react-simple-star-rating";
 import { useEffect } from "react";
 import ImageZoom from "js-image-zoom";
 
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/actions/cartActions";
+
 const ProductDetailsPage = () => {
+  const dispatch = useDispatch();
+
+  const addToCartHandler = () => {
+    dispatch(addToCart());
+  };
+
+  const products = useSelector((state) => state.cart.value);
+
   let options = {
     scale: 2,
     offset: { vertical: 0, horizontal: 0 },
@@ -78,7 +89,9 @@ const ProductDetailsPage = () => {
                   </Form.Select>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <Button variant="danger">Add to cart</Button>
+                  <Button variant="danger" onClick={addToCartHandler}>
+                    Add to cart
+                  </Button>
                 </ListGroup.Item>
               </ListGroup>
             </Col>
