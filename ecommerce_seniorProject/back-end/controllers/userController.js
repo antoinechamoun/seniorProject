@@ -70,7 +70,7 @@ const loginUser = async (req, res, next) => {
     if (!(email && password)) {
       return res.status(400).send("All fields are required");
     }
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).orFail();
     if (user && comparePasswords(password, user.password)) {
       let cookieParams = {
         httpOnly: true,
@@ -105,7 +105,7 @@ const loginUser = async (req, res, next) => {
           },
         });
     } else {
-      res.status(401).send("Wrong credentials!");
+      res.status(401).send("wrong credentials");
     }
   } catch (error) {
     next(error);
