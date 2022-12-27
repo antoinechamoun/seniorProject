@@ -12,7 +12,11 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
 
+import { logout } from "../../../redux/actions/userActions";
+import { useDispatch } from "react-redux";
+
 const OrderDetailsPageComponent = ({ getOrderDetails, markAsDelivered }) => {
+  const dispatch = useDispatch();
   const { id } = useParams();
   const [userInfo, setUserInfo] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
@@ -41,10 +45,9 @@ const OrderDetailsPageComponent = ({ getOrderDetails, markAsDelivered }) => {
         setCartItems(res.cartItems);
       })
       .catch((er) => {
-        console.log(
-          er.response.data.message ? er.response.data.message : er.response.data
-        );
+        dispatch(logout());
       });
+    // eslint-disable-next-line
   }, [isDelivered, id]);
 
   return (

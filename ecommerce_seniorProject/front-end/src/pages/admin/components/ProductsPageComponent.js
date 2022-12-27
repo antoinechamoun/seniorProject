@@ -2,21 +2,21 @@ import { useEffect, useState } from "react";
 import { Col, Row, Table, Button } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import AdminLinksComponent from "../../../components/admin/AdminLinksComponent";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../redux/actions/userActions";
 
 const ProductsPageComponent = ({ fetchProducts, deleteProduct }) => {
   const [products, setProducts] = useState([]);
   const [productDeleted, setProductDeleted] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const abctrl = new AbortController();
     fetchProducts(abctrl)
       .then((res) => setProducts(res))
-      .catch((er) =>
-        console.log(
-          er.response.data.message ? er.response.data.message : er.response.data
-        )
-      );
+      .catch((er) => console.log(dispatch(logout())));
     return () => abctrl.abort();
+    // eslint-disable-next-line
   }, [productDeleted]);
 
   const deleteHandler = async (productId) => {

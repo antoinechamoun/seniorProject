@@ -48,9 +48,9 @@ const LoginPageComponent = ({
           }
 
           if (res.success === "User logged in" && !res.userLoggedIn.isAdmin) {
-            navigate("/user", { replace: true });
+            window.location.href = "/user";
           } else {
-            navigate("/admin/orders", { replace: true });
+            window.location.href = "/admin/orders";
           }
         })
         .catch((er) =>

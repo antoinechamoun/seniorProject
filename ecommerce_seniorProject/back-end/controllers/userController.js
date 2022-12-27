@@ -22,7 +22,7 @@ const registerUser = async (req, res, next) => {
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      res.status(400).json({ error: "User already exists" });
+      res.status(400).json({ error: "user exists" });
     } else {
       const hashedPassword = hashPassword(password);
       const user = await User.create({

@@ -2,20 +2,18 @@ import { useEffect, useState } from "react";
 import { Col, Row, Table } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import AdminLinksComponent from "../../../components/admin/AdminLinksComponent";
+import { logout } from "../../../redux/actions/userActions";
+import { useDispatch } from "react-redux";
 
 const OrdersPageComponent = ({ getOrders }) => {
   const [orders, setOrders] = useState([]);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getOrders()
       .then((orders) => setOrders(orders))
-      .catch((err) =>
-        console.log(
-          err.response.data.message
-            ? err.response.data.message
-            : err.response.data
-        )
-      );
+      .catch((err) => console.log(dispatch(logout())));
+    // eslint-disable-next-line
   }, []);
 
   return (
