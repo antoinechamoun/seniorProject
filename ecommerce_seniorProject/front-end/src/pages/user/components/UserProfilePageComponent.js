@@ -20,11 +20,12 @@ const UserProfilePageComponent = ({
   const userInfo = userInfoFromRedux;
 
   useEffect(() => {
-    fetchUser(userInfo._id)
+    console.log(userInfo);
+    fetchUser(userInfo._id ? userInfo._id : userInfo.id)
       .then((res) => setUser(res))
       .catch((er) => console.log(er));
     // eslint-disable-next-line
-  }, [userInfo._id]);
+  }, [userInfo.id]);
 
   const onChange = () => {
     const password = document.querySelector("input[name=password]");

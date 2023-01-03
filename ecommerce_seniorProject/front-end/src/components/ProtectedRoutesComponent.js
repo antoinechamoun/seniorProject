@@ -9,7 +9,6 @@ const ProtectedRoutesComponent = ({ admin }) => {
 
   useEffect(() => {
     axios.get("/api/get-token").then((res) => {
-      console.log(res.data);
       if (res.data.token) {
         setIsAuth(res.data.token);
       }
@@ -19,7 +18,6 @@ const ProtectedRoutesComponent = ({ admin }) => {
 
   if (isAuth === undefined) return <LoginPage />;
 
-  console.log(isAuth);
   return isAuth && admin && isAuth !== "admin" ? (
     <Navigate to="/login" />
   ) : isAuth && admin ? (
