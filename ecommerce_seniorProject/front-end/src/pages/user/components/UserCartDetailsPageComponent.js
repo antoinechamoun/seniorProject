@@ -40,8 +40,8 @@ const UserCartDetailsPageComponent = ({
   };
 
   useEffect(() => {
-    getUser()
-      .then((res) => {
+    try {
+      getUser().then((res) => {
         if (
           !res.address ||
           !res.city ||
@@ -64,12 +64,12 @@ const UserCartDetailsPageComponent = ({
             phoneNumber: res.phoneNumber,
           });
         }
-      })
-      .catch((er) =>
-        console.log(
-          er.response.data.message ? er.response.data.message : er.response.data
-        )
+      });
+    } catch (er) {
+      console.log(
+        er.response.data.message ? er.response.data.message : er.response.data
       );
+    }
     // eslint-disable-next-line
   }, [userInfo.id]);
 

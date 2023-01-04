@@ -11,11 +11,11 @@ const ProductsPageComponent = ({ fetchProducts, deleteProduct }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const abctrl = new AbortController();
-    fetchProducts(abctrl)
+    fetchProducts()
       .then((res) => setProducts(res))
-      .catch((er) => console.log(dispatch(logout())));
-    return () => abctrl.abort();
+      .catch((er) => {
+        dispatch(logout());
+      });
     // eslint-disable-next-line
   }, [productDeleted]);
 

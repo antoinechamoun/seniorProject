@@ -1,10 +1,8 @@
 import UsersPageComponent from "./components/UsersPageComponent";
 import axios from "axios";
 
-const fetchUsers = async (abctrl) => {
-  const { data } = await axios.get("/api/users", {
-    signal: abctrl.signal,
-  });
+const fetchUsers = async () => {
+  const { data } = await axios.get("/api/users");
   return data;
 };
 

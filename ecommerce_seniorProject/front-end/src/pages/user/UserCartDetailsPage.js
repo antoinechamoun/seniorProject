@@ -11,7 +11,8 @@ const UserCartDetailsPage = () => {
   const reduxDispatch = useDispatch();
 
   const getUser = async () => {
-    const { data } = await axios.get("/api/users/profile/" + userInfo._id);
+    let id = userInfo._id ? userInfo._id : userInfo.id;
+    const { data } = await axios.get("/api/users/profile/" + id);
     return data;
   };
 

@@ -20,13 +20,11 @@ const UsersPageComponent = ({ fetchUsers, deleteUser }) => {
   };
 
   useEffect(() => {
-    const abctrl = new AbortController();
-    fetchUsers(abctrl)
+    fetchUsers()
       .then((res) => setUsers(res))
-      .catch((er) => {
+      .catch(() => {
         console.log(dispatch(logout()));
       });
-    return () => abctrl.abort();
     // eslint-disable-next-line
   }, [userDeleted]);
 
