@@ -192,6 +192,8 @@ const adminUpdateProduct = async (req, res, next) => {
       attributesTable.map((item) => {
         product.attrs.push(item);
       });
+    } else {
+      product.attrs = [];
     }
     await product.save();
     res.json({ message: "product updated", productId: product._id });
