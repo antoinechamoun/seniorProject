@@ -23,12 +23,16 @@ const AdminEditProductPageComponent = ({
   const [product, setProduct] = useState({});
   const navigate = useNavigate();
   const [attributesFromDb, setAttributesFromDb] = useState([]);
+  const [attributesTable, setAttributesTable] = useState([]);
   const [updateProductResponseState, setUpdateProductResponseState] = useState({
     message: "",
     error: "",
   });
   const attrValue = useRef(null);
   const attrKey = useRef(null);
+  const [categoryChosen, setCategoryChosen] = useState("Choose category");
+  const [newAttrValue, setNewAttrValue] = useState(false);
+  const [newKeyValue, setNewKeyValue] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,7 +45,7 @@ const AdminEditProductPageComponent = ({
       count: form.count.value,
       price: form.price.value,
       category: form.category.value,
-      attributesTable: [],
+      attributesTable: attributesTable,
     };
 
     if (e.currentTarget.checkValidity() === true) {
@@ -86,6 +90,8 @@ const AdminEditProductPageComponent = ({
         setAttributesFromDb(mainCategoryOfEditedProductAllData.attrs);
       }
     }
+    setCategoryChosen(product.category);
+    setAttributesTable(product.attrs);
     // eslint-disable-next-line
   }, [product]);
 
@@ -106,6 +112,78 @@ const AdminEditProductPageComponent = ({
     }
   };
 
+  const changeCategory = (e) => {
+    const highLevelCategory = e.target.value.split("/")[0];
+    const highLevelCategoryAllData = categories.find(
+      (category) => category.name === highLevelCategory
+    );
+    if (highLevelCategoryAllData && highLevelCategoryAllData.attrs) {
+      setAttributesFromDb(highLevelCategoryAllData.attrs);
+    } else {
+      setAttributesFromDb([]);
+    }
+    setCategoryChosen(e.target.value);
+  };
+
+  const attributeValueSelected = (e) => {
+    if (e.target.value !== "Choose attribute value") {
+      setAttributesTableWrapper(attrKey.current.value, e.target.value);
+    }
+    setCategoryChosen(e.target.value);
+  };
+
+  const setAttributesTableWrapper = (key, value) => {
+    setAttributesTable((attr) => {
+      if (attr.length !== 0) {
+        let keyExistsInOldTable = false;
+        let modifiedTable = attr.map((item) => {
+          if (item.key === key) {
+            keyExistsInOldTable = true;
+            item.value = value;
+            return item;
+          } else {
+            return item;
+          }
+        });
+        if (keyExistsInOldTable) return [...modifiedTable];
+        else return [...modifiedTable, { key: key, value: value }];
+      } else {
+        return [{ key: key, value: value }];
+      }
+    });
+  };
+
+  const deleteAttribute = (key) => {
+    setAttributesTable((table) => table.filter((item) => item.key !== key));
+  };
+
+  const checkKeyDown = (e) => {
+    if (e.code === "Enter" || e.code === "NumpadEnter") e.preventDefault();
+  };
+
+  const newAttrKeyHandler = (e) => {
+    e.preventDefault();
+    console.log(e);
+    if (e.keyCode && e.keyCode === 13) {
+    }
+  };
+
+  const newAttrHandler = (e) => {
+    e.preventDefault();
+    console.log(e);
+    if (e.target.name === "newAttrKey") {
+      setNewKeyValue(e.target.value);
+    } else if (e.target.name === "newAttrValue") {
+      setNewAttrValue(e.target.value);
+    }
+    console.log(newAttrValue, newKeyValue);
+    if (e.keyCode && e.keyCode === 13) {
+      if (newAttrValue && newKeyValue) {
+        console.log(1);
+      }
+    }
+  };
+
   return (
     <Container>
       <Row className="mt-5 justify-content-md-center">
@@ -116,7 +194,12 @@ const AdminEditProductPageComponent = ({
         </Col>
         <Col md={6}>
           <h1>Edit product</h1>
-          <Form noValidate validated={validated} onSubmit={handleSubmit}>
+          <Form
+            noValidate
+            validated={validated}
+            onSubmit={handleSubmit}
+            onKeyDown={(e) => checkKeyDown(e)}
+          >
             <Form.Group className="mb-3" controlId="formBasicName">
               <Form.Label>Name</Form.Label>
               <Form.Control
@@ -160,10 +243,9 @@ const AdminEditProductPageComponent = ({
                 name="category"
                 required
                 aria-label="Default select example"
+                onChange={changeCategory}
               >
-                <option value="" disabled>
-                  Choose a category
-                </option>
+                <option value="Choose category">Choose a category</option>
                 {categories.map((category, id) => {
                   return product.category === category.name ? (
                     <option key={id} selected value={category.name}>
@@ -189,7 +271,7 @@ const AdminEditProductPageComponent = ({
                       ref={attrKey}
                       onChange={setValuesForAttrFromDb}
                     >
-                      <option disabled>Choose attribute</option>
+                      <option>Choose attribute</option>
                       {attributesFromDb.map((attr, id) => (
                         <option value={attr.key} key={id}>
                           {attr.key}
@@ -208,6 +290,7 @@ const AdminEditProductPageComponent = ({
                       name="attrVal"
                       ara-label="Default select example"
                       ref={attrValue}
+                      onChange={attributeValueSelected}
                     >
                       <option>Choose attribute value</option>
                     </Form.Select>
@@ -216,35 +299,42 @@ const AdminEditProductPageComponent = ({
               </Row>
             )}
             <Row>
-              <Table>
-                <thead>
-                  <tr>
-                    <th>Attribute</th>
-                    <th>Value</th>
-                    <th>Delete</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>attr key</td>
-                    <td>attr value</td>
-                    <td>
-                      <CloseButton />
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
+              {attributesTable && attributesTable.length > 0 && (
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Attribute</th>
+                      <th>Value</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attributesTable.map((item, id) => (
+                      <tr key={id}>
+                        <td>{item.key}</td>
+                        <td>{item.value}</td>
+                        <td>
+                          <CloseButton
+                            onClick={() => deleteAttribute(item.key)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
             </Row>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3" controlId="formBasicNewAttribute">
                   <Form.Label>Create new attribute</Form.Label>
                   <Form.Control
-                    disabled={false}
+                    disabled={categoryChosen === "Choose category"}
                     placeholder="first choose or create category"
-                    name="newAttrValue"
+                    name="newAttrKey"
                     required
                     type="text"
+                    onKeyUp={newAttrHandler}
                   />
                 </Form.Group>
               </Col>
@@ -255,11 +345,12 @@ const AdminEditProductPageComponent = ({
                 >
                   <Form.Label>Attribute value</Form.Label>
                   <Form.Control
-                    disabled={false}
+                    disabled={categoryChosen === "Choose category"}
                     placeholder="first choose or create category"
                     name="newAttrValue"
                     required
                     type="text"
+                    onKeyUp={newAttrHandler}
                   />
                 </Form.Group>
               </Col>
