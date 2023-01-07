@@ -1,6 +1,8 @@
 import { useSelector } from "react-redux";
 import axios from "axios";
 import AdminEditProductPageComponent from "./components/AdminEditProductPageComponent";
+import { useDispatch } from "react-redux";
+import { saveAttributeToCatDoc } from "../../redux/actions/categoryActions";
 
 const fetchProduct = async (productId) => {
   const { data } = await axios.get(`/api/products/get-one/${productId}`);
@@ -14,14 +16,27 @@ const updateProductApiRequest = async (productId, formInputs) => {
   return data;
 };
 
+const uploadHandler = async (images, productId) => {
+  const formData = new FormData();
+};
+
 const AdminEditProductPage = () => {
   const { categories } = useSelector((state) => state.getCategories);
+  const reduxDispatch = useDispatch();
+
+  const imageDeleteHandler = async (imagePath, productId) => {
+    let encoded = encodeURIComponent(imagePath);
+    await axios.delete(`/api/products/admin/image/${encoded}/${productId}`);
+  };
 
   return (
     <AdminEditProductPageComponent
       categories={categories}
       fetchProduct={fetchProduct}
       updateProductApiRequest={updateProductApiRequest}
+      reduxDispatch={reduxDispatch}
+      saveAttributeToCatDoc={saveAttributeToCatDoc}
+      imageDeleteHandler={imageDeleteHandler}
     />
   );
 };

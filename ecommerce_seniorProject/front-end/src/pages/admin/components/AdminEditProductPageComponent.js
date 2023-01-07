@@ -17,6 +17,9 @@ const AdminEditProductPageComponent = ({
   categories,
   fetchProduct,
   updateProductApiRequest,
+  reduxDispatch,
+  saveAttributeToCatDoc,
+  imageDeleteHandler,
 }) => {
   const { id } = useParams();
   const [validated, setValidated] = useState(false);
@@ -28,11 +31,14 @@ const AdminEditProductPageComponent = ({
     message: "",
     error: "",
   });
+  const createNewAttrKey = useRef(null);
+  const createNewAttrVal = useRef(null);
   const attrValue = useRef(null);
   const attrKey = useRef(null);
   const [categoryChosen, setCategoryChosen] = useState("Choose category");
-  const [newAttrValue, setNewAttrValue] = useState(false);
-  const [newKeyValue, setNewKeyValue] = useState(false);
+  const [newAttrValue, setNewAttrValue] = useState("");
+  const [newKeyValue, setNewKeyValue] = useState("");
+  const [imageRemoved, setImageRemoved] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -71,7 +77,7 @@ const AdminEditProductPageComponent = ({
       .then((res) => setProduct(res))
       .catch((er) => console.log(er));
     // eslint-disable-next-line
-  }, [id]);
+  }, [id, imageRemoved]);
 
   useEffect(() => {
     let categoryOfEditedProduct = categories.find(
@@ -161,25 +167,25 @@ const AdminEditProductPageComponent = ({
     if (e.code === "Enter" || e.code === "NumpadEnter") e.preventDefault();
   };
 
-  const newAttrKeyHandler = (e) => {
-    e.preventDefault();
-    console.log(e);
-    if (e.keyCode && e.keyCode === 13) {
-    }
-  };
-
   const newAttrHandler = (e) => {
     e.preventDefault();
-    console.log(e);
     if (e.target.name === "newAttrKey") {
       setNewKeyValue(e.target.value);
     } else if (e.target.name === "newAttrValue") {
       setNewAttrValue(e.target.value);
     }
-    console.log(newAttrValue, newKeyValue);
+
     if (e.keyCode && e.keyCode === 13) {
       if (newAttrValue && newKeyValue) {
-        console.log(1);
+        reduxDispatch(
+          saveAttributeToCatDoc(newKeyValue, newAttrValue, categoryChosen)
+        );
+        setAttributesTableWrapper(newKeyValue, newAttrValue);
+        e.target.value = "";
+        createNewAttrVal.current.value = "";
+        createNewAttrKey.current.value = "";
+        setNewAttrValue("");
+        setNewKeyValue("");
       }
     }
   };
@@ -329,10 +335,11 @@ const AdminEditProductPageComponent = ({
                 <Form.Group className="mb-3" controlId="formBasicNewAttribute">
                   <Form.Label>Create new attribute</Form.Label>
                   <Form.Control
+                    ref={createNewAttrKey}
                     disabled={categoryChosen === "Choose category"}
                     placeholder="first choose or create category"
                     name="newAttrKey"
-                    required
+                    required={newAttrValue}
                     type="text"
                     onKeyUp={newAttrHandler}
                   />
@@ -345,17 +352,21 @@ const AdminEditProductPageComponent = ({
                 >
                   <Form.Label>Attribute value</Form.Label>
                   <Form.Control
+                    ref={createNewAttrVal}
                     disabled={categoryChosen === "Choose category"}
                     placeholder="first choose or create category"
                     name="newAttrValue"
-                    required
+                    required={newKeyValue}
                     type="text"
                     onKeyUp={newAttrHandler}
                   />
                 </Form.Group>
               </Col>
             </Row>
-            <Alert variant="primary">
+            <Alert
+              show={newAttrValue !== "" && newKeyValue !== ""}
+              variant="primary"
+            >
               After typing key and attribute value press enter on one of the
               field
             </Alert>
@@ -363,8 +374,8 @@ const AdminEditProductPageComponent = ({
               <Form.Label>Images</Form.Label>
               <Row>
                 {product.images &&
-                  product.images.map((image, id) => (
-                    <Col key={id} style={{ position: "relative" }} xs={3}>
+                  product.images.map((image, idx) => (
+                    <Col key={idx} style={{ position: "relative" }} xs={3}>
                       <Image
                         crossOrigin="anonymous"
                         src={image.path ?? null}
@@ -372,6 +383,11 @@ const AdminEditProductPageComponent = ({
                       />
                       <i
                         className="bi bi-x text-danger"
+                        onClick={() =>
+                          imageDeleteHandler(image.path, id).then(() =>
+                            setImageRemoved(!imageRemoved)
+                          )
+                        }
                         style={{
                           cursor: "pointer",
                           position: "absolute",

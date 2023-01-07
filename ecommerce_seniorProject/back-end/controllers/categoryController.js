@@ -54,21 +54,24 @@ const saveAttribute = async (req, res, next) => {
     const category = categoryChosen.split("/")[0];
     const categoryExists = await Category.findOne({ name: category }).orFail();
     if (categoryExists.attrs.length > 0) {
-      let keyDoesNotExistsInDatabase = false;
+      let keyDoesNotExistsInDatabase = true;
       categoryExists.attrs.map((item, id) => {
         if (item.key === key) {
-          keyDoesNotExistsInDatabase = true;
+          keyDoesNotExistsInDatabase = false;
           let copyAttributesValues = [...categoryExists.attrs[id].value];
           copyAttributesValues.push(val);
           let newAttributeValues = [...new Set(copyAttributesValues)];
           categoryExists.attrs[id].value = newAttributeValues;
-        } else {
-          categoryExists.attrs.push({ key, value: [val] });
         }
       });
+
+      if (keyDoesNotExistsInDatabase) {
+        categoryExists.attrs.push({ key: key, value: [val] });
+      }
     } else {
-      categoryExists.attrs.push({ key, value: [val] });
+      categoryExists.attrs.push({ key: key, value: [val] });
     }
+
     await categoryExists.save();
     let cat = await Category.find({}).sort({ name: "asc" });
     return res.status(201).json({ categoriesUpdated: cat });
