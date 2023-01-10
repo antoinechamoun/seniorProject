@@ -20,6 +20,7 @@ const AdminEditProductPageComponent = ({
   reduxDispatch,
   saveAttributeToCatDoc,
   imageDeleteHandler,
+  uploadHandler,
 }) => {
   const { id } = useParams();
   const [validated, setValidated] = useState(false);
@@ -39,6 +40,8 @@ const AdminEditProductPageComponent = ({
   const [newAttrValue, setNewAttrValue] = useState("");
   const [newKeyValue, setNewKeyValue] = useState("");
   const [imageRemoved, setImageRemoved] = useState(false);
+  const [isUploading, setIsUploading] = useState("");
+  const [imageUploaded, setImageUploaded] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -77,7 +80,7 @@ const AdminEditProductPageComponent = ({
       .then((res) => setProduct(res))
       .catch((er) => console.log(er));
     // eslint-disable-next-line
-  }, [id, imageRemoved]);
+  }, [id, imageRemoved, imageUploaded]);
 
   useEffect(() => {
     let categoryOfEditedProduct = categories.find(
@@ -399,8 +402,28 @@ const AdminEditProductPageComponent = ({
                     </Col>
                   ))}
               </Row>
-              <Form.Control type="file" required multiple />
+              <Form.Control
+                type="file"
+                required
+                multiple
+                onChange={(e) => {
+                  setIsUploading("upload files in progress ...");
+                  uploadHandler(e.target.files, id)
+                    .then(() => {
+                      setIsUploading("upload file completed");
+                      setImageUploaded(!imageUploaded);
+                    })
+                    .catch((err) => {
+                      setIsUploading(
+                        err.response.data.message
+                          ? err.response.data.message
+                          : err.response.data
+                      );
+                    });
+                }}
+              />
             </Form.Group>
+            {isUploading}
             <Button variant="primary" type="submit">
               Update
             </Button>

@@ -18,6 +18,13 @@ const updateProductApiRequest = async (productId, formInputs) => {
 
 const uploadHandler = async (images, productId) => {
   const formData = new FormData();
+  Array.from(images).forEach((image) => {
+    formData.append("images", image);
+  });
+  await axios.post(
+    "/api/products/admin/upload?productId=" + productId,
+    formData
+  );
 };
 
 const AdminEditProductPage = () => {
@@ -37,6 +44,7 @@ const AdminEditProductPage = () => {
       reduxDispatch={reduxDispatch}
       saveAttributeToCatDoc={saveAttributeToCatDoc}
       imageDeleteHandler={imageDeleteHandler}
+      uploadHandler={uploadHandler}
     />
   );
 };

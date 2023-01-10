@@ -12,9 +12,9 @@ const {
   verifyIsAdmin,
 } = require("../middleware/verifyAuthToken");
 
+router.get("/", getCategories);
 router.use(verifyIsLoggedIn);
 router.use(verifyIsAdmin);
-router.get("/", getCategories);
 router.post("/", newCategory);
 router.delete("/:category", deleteCategory);
 router.post("/attrs", saveAttribute);
