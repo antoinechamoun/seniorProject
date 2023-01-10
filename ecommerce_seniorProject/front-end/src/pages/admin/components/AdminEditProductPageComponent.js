@@ -21,6 +21,8 @@ const AdminEditProductPageComponent = ({
   saveAttributeToCatDoc,
   imageDeleteHandler,
   uploadHandler,
+  uploadImagesApiRequest,
+  uploadImagesCloudinaryApiRequest,
 }) => {
   const { id } = useParams();
   const [validated, setValidated] = useState(false);
@@ -408,18 +410,28 @@ const AdminEditProductPageComponent = ({
                 multiple
                 onChange={(e) => {
                   setIsUploading("upload files in progress ...");
-                  uploadHandler(e.target.files, id)
-                    .then(() => {
-                      setIsUploading("upload file completed");
+                  if (process.env.NODE_ENV !== "production") {
+                    uploadImagesApiRequest(e.target.files, id)
+                      .then(() => {
+                        setIsUploading("upload file completed");
+                        setImageUploaded(!imageUploaded);
+                      })
+                      .catch((err) => {
+                        setIsUploading(
+                          err.response.data.message
+                            ? err.response.data.message
+                            : err.response.data
+                        );
+                      });
+                  } else {
+                    uploadImagesCloudinaryApiRequest(e.target.files, id);
+                    setIsUploading(
+                      "upload file completed. Wait for the result take effect, refresh also if necessary"
+                    );
+                    setTimeout(() => {
                       setImageUploaded(!imageUploaded);
-                    })
-                    .catch((err) => {
-                      setIsUploading(
-                        err.response.data.message
-                          ? err.response.data.message
-                          : err.response.data
-                      );
                     });
+                  }
                 }}
               />
             </Form.Group>

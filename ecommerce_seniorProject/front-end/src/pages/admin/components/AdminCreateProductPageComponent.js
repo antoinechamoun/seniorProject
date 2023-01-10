@@ -39,10 +39,14 @@ const AdminCreateProductPageComponent = ({
       attributesTable: attributesTable,
     };
     if (e.currentTarget.checkValidity() === true) {
+      if (images.length > 3) {
+        setIsCreating("too many files");
+        return;
+      }
       createProductApiRequest(formInputs)
         .then((res) => {
           if (images) {
-            if (process.env.NODE_ENV === "production") {
+            if (process.env.NODE_ENV !== "production") {
               uploadImagesApiRequest(images, res.productId)
                 .then((res) => {})
                 .catch((er) =>
@@ -52,12 +56,11 @@ const AdminCreateProductPageComponent = ({
                       : er.response.data
                   )
                 );
+            } else {
+              uploadImagesCloudinaryApiRequest(images, res.productId);
             }
-            uploadImagesCloudinaryApiRequest(images);
           }
-          if (res.message === "product created") {
-            navigate("/admin/products");
-          }
+          if (res.message === "product created") navigate("/admin/products");
         })
         .catch((er) =>
           setCreateProductResponseState({
