@@ -9,14 +9,40 @@ import ProductForListComponent from "../../components/ProductForListComponent";
 import PaginationComponent from "../../components/PaginationComponent";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
-const ProductListPageComponent = ({ getProducts }) => {
+const ProductListPageComponent = ({ getProducts, categories }) => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [attrsFilter, setAttrsFilter] = useState([]);
+  const { categoryName } = useParams() || "";
+
+  useEffect(() => {
+    if (categoryName) {
+      let categoryAllData = categories.find(
+        (item) => item.name === categoryName.replaceAll(",", "/")
+      );
+      if (categoryAllData) {
+        let mainCategory = categoryAllData.name.split("/")[0];
+        let index = categories.findIndex((item) => item.name === mainCategory);
+        setAttrsFilter(categories[index].attrs);
+      }
+    } else {
+      setAttrsFilter([]);
+    }
+  }, [categoryName, categories]);
 
   useEffect(() => {
     getProducts()
-      .then((res) => setProducts(res.products))
-      .catch((er) => console.log(er));
+      .then((res) => {
+        setProducts(res.products);
+        setLoading(false);
+      })
+      .catch((er) => {
+        console.log(er);
+        setError(true);
+      });
     // eslint-disable-next-line
   }, []);
 
@@ -40,7 +66,7 @@ const ProductListPageComponent = ({ getProducts }) => {
               <CategoryFilterComponent />
             </ListGroup.Item>
             <ListGroup.Item>
-              <AttributesFilterComponent />
+              <AttributesFilterComponent attrsFilter={attrsFilter} />
             </ListGroup.Item>
             <ListGroup.Item>
               <Button variant="primary">Filter</Button>
@@ -49,20 +75,26 @@ const ProductListPageComponent = ({ getProducts }) => {
           </ListGroup>
         </Col>
         <Col md={9}>
-          {products.map((product) => {
-            return (
-              <ProductForListComponent
-                key={product._id}
-                name={product.name}
-                images={product.images}
-                description={product.description}
-                price={product.price}
-                rating={product.rating}
-                reviewsNumber={product.reviewsNumber}
-                productId={product._id}
-              />
-            );
-          })}
+          {loading ? (
+            <h1>Loading products...</h1>
+          ) : error ? (
+            <h1>An error occurred while loading products. Try again later.</h1>
+          ) : (
+            products.map((product) => {
+              return (
+                <ProductForListComponent
+                  key={product._id}
+                  name={product.name}
+                  images={product.images}
+                  description={product.description}
+                  price={product.price}
+                  rating={product.rating}
+                  reviewsNumber={product.reviewsNumber}
+                  productId={product._id}
+                />
+              );
+            })
+          )}
           <PaginationComponent />
         </Col>
       </Row>

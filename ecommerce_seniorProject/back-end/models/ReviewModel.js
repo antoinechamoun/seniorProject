@@ -15,7 +15,7 @@ const reviewSchema = mongoose.Schema(
       name: { type: String, required: true },
     },
   },
-  { timeStamps: true }
+  { timestamps: true }
 );
 
 const Review = mongoose.model("Review", reviewSchema);

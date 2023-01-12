@@ -209,8 +209,8 @@ const writeReview = async (req, res, next) => {
     await product.save();
 
     await session.commitTransaction();
-    session.abortTransaction();
-    res.send("Review Created");
+    session.endSession();
+    res.send("review created");
   } catch (error) {
     await session.abortTransaction();
     next(error);
@@ -233,7 +233,7 @@ const updateUser = async (req, res, next) => {
     user.name = req.body.name || user.name;
     user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
-    user.isAdmin = req.body.isAdmin || user.isAdmin;
+    user.isAdmin = req.body.isAdmin;
     await user.save();
     res.send("user updated");
   } catch (error) {

@@ -35,7 +35,6 @@ const UsersPageComponent = ({ fetchUsers, deleteUser }) => {
       </Col>
       <Col md={10}>
         <h1>Orders</h1>
-        {console.log(users)}
         <Table striped bordered hover responsive>
           <thead>
             <tr>

@@ -33,7 +33,10 @@ function App() {
         <Route element={<RoutesWithUserChatComponent />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/cart-page" element={<CartPage />} />
-          <Route path="/product-list" element={<ProductListPage />} />
+          <Route
+            path="/product-list/category/:categoryName"
+            element={<ProductListPage />}
+          />
           <Route path="/product-details/:id" element={<ProductDetailsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -52,7 +55,7 @@ function App() {
 
         <Route element={<ProtectedRoutesComponent admin={true} />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
-          <Route path="/admin/edit-user" element={<AdminEditUserPage />} />
+          <Route path="/admin/edit-user/:id" element={<AdminEditUserPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route
             path="/admin/create-new-product"
