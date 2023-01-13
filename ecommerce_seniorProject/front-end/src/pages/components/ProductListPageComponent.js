@@ -9,15 +9,23 @@ import ProductForListComponent from "../../components/ProductForListComponent";
 import PaginationComponent from "../../components/PaginationComponent";
 import { useEffect } from "react";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 const ProductListPageComponent = ({ getProducts, categories }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [attrsFilter, setAttrsFilter] = useState([]);
+  const [attrsFromFilter, setAttrsFromFilter] = useState([]);
   const { categoryName } = useParams() || "";
+  const [showResetFiltersButton, setShowResetFiltersButton] = useState(false);
 
+  const [filters, setFilters] = useState({});
+  const [price, setPrice] = useState(500);
+  const [ratingFromFilter, setRatingFromFilter] = useState({});
+  const [categoriesFromFilter, setCategoriesFromFilter] = useState({});
+
+  const location = useLocation();
   useEffect(() => {
     if (categoryName) {
       let categoryAllData = categories.find(
@@ -43,8 +51,44 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
         console.log(er);
         setError(true);
       });
+    console.log(filters);
     // eslint-disable-next-line
-  }, []);
+  }, [filters]);
+
+  const handleFilters = () => {
+    setShowResetFiltersButton(true);
+    setFilters({
+      price,
+      rating: ratingFromFilter,
+      categories: categoriesFromFilter,
+      attrs: attrsFromFilter,
+    });
+  };
+
+  useEffect(() => {
+    if (Object.entries(categoriesFromFilter).length > 0) {
+      setAttrsFilter([]);
+      let cat = [];
+      let count;
+      Object.entries(categoriesFromFilter).forEach(([category, checked]) => {
+        if (checked) {
+          let name = category.split("/")[0];
+          cat.push(name);
+          count = cat.filter((x) => x === name).length;
+          if (count === 1) {
+            let index = categories.findIndex((item) => item.name === name);
+            setAttrsFilter((attrs) => [...attrs, ...categories[index].attrs]);
+          }
+        }
+      });
+    }
+  }, [categories, categoriesFromFilter]);
+
+  const resetFilters = () => {
+    setShowResetFiltersButton(false);
+    setFilters({});
+    window.location.href = "/product-list";
+  };
 
   return (
     <Container fluid>
@@ -56,21 +100,36 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
             </ListGroup.Item>
             <ListGroup.Item>
               <span className="fw-bold">FILTER: </span> <br />
-              <PriceFilterComponent />
+              <PriceFilterComponent price={price} setPrice={setPrice} />
             </ListGroup.Item>
             <ListGroup.Item>
-              <RatingFilterComponent />
+              <RatingFilterComponent
+                setRatingFromFilter={setRatingFromFilter}
+              />
+            </ListGroup.Item>
+            {!location.pathname.match(/\/category/) && (
+              <ListGroup.Item>
+                <span className="fw-bold">Category: </span> <br />
+                <CategoryFilterComponent
+                  setCategoriesFromFilter={setCategoriesFromFilter}
+                />
+              </ListGroup.Item>
+            )}
+            <ListGroup.Item>
+              <AttributesFilterComponent
+                attrsFilter={attrsFilter}
+                setAttrsFromFilter={setAttrsFromFilter}
+              />
             </ListGroup.Item>
             <ListGroup.Item>
-              <span className="fw-bold">Category: </span> <br />
-              <CategoryFilterComponent />
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <AttributesFilterComponent attrsFilter={attrsFilter} />
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <Button variant="primary">Filter</Button>
-              <Button variant="danger">Reset</Button>
+              <Button variant="primary" onClick={handleFilters}>
+                Filter
+              </Button>
+              {showResetFiltersButton && (
+                <Button variant="danger" onClick={resetFilters}>
+                  Reset
+                </Button>
+              )}
             </ListGroup.Item>
           </ListGroup>
         </Col>

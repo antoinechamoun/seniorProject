@@ -33,6 +33,7 @@ function App() {
         <Route element={<RoutesWithUserChatComponent />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/cart-page" element={<CartPage />} />
+          <Route path="/product-list" element={<ProductListPage />} />
           <Route
             path="/product-list/category/:categoryName"
             element={<ProductListPage />}
