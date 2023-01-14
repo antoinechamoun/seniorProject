@@ -9,7 +9,7 @@ import ProductForListComponent from "../../components/ProductForListComponent";
 import PaginationComponent from "../../components/PaginationComponent";
 import { useEffect } from "react";
 import { useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const ProductListPageComponent = ({ getProducts, categories }) => {
   const [products, setProducts] = useState([]);
@@ -17,15 +17,22 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
   const [error, setError] = useState(false);
   const [attrsFilter, setAttrsFilter] = useState([]);
   const [attrsFromFilter, setAttrsFromFilter] = useState([]);
-  const { categoryName } = useParams() || "";
   const [showResetFiltersButton, setShowResetFiltersButton] = useState(false);
 
   const [filters, setFilters] = useState({});
   const [price, setPrice] = useState(500);
   const [ratingFromFilter, setRatingFromFilter] = useState({});
   const [categoriesFromFilter, setCategoriesFromFilter] = useState({});
+  const [sortOption, setSortOption] = useState("");
+  const [paginationLinksNumber, setPaginationLinksNumber] = useState(null);
+  const [pageNum, setPageNum] = useState(null);
 
+  const { categoryName } = useParams() || "";
+  const { pageNumParam } = useParams() || 1;
+  const { searchQuery } = useParams() || "";
   const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (categoryName) {
       let categoryAllData = categories.find(
@@ -42,20 +49,22 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
   }, [categoryName, categories]);
 
   useEffect(() => {
-    getProducts()
+    getProducts(categoryName, pageNumParam, searchQuery, filters, sortOption)
       .then((res) => {
         setProducts(res.products);
+        setPaginationLinksNumber(res.paginationLinksNumber);
+        setPageNum(res.pageNum);
         setLoading(false);
       })
       .catch((er) => {
         console.log(er);
         setError(true);
       });
-    console.log(filters);
     // eslint-disable-next-line
-  }, [filters]);
+  }, [categoryName, pageNumParam, searchQuery, filters, sortOption]);
 
   const handleFilters = () => {
+    navigate(location.pathname.replace(/\/[0-9]+$/, ""));
     setShowResetFiltersButton(true);
     setFilters({
       price,
@@ -96,7 +105,7 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
         <Col md={3}>
           <ListGroup variant="flush">
             <ListGroup.Item className="mb-3 mt-3">
-              <SortOptionsComponent />
+              <SortOptionsComponent setSortOption={setSortOption} />
             </ListGroup.Item>
             <ListGroup.Item>
               <span className="fw-bold">FILTER: </span> <br />
@@ -154,7 +163,14 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
               );
             })
           )}
-          <PaginationComponent />
+          {paginationLinksNumber > 1 ? (
+            <PaginationComponent
+              categoryName={categoryName}
+              searchQuery={searchQuery}
+              paginationLinksNumber={paginationLinksNumber}
+              pageNum={pageNum}
+            />
+          ) : null}
         </Col>
       </Row>
     </Container>
