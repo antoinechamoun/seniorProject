@@ -6,7 +6,6 @@ const ProductCarouselComponent = ({ bestSellers }) => {
     cursor: "pointer",
   };
 
-  console.log(bestSellers);
   return bestSellers.length > 0 ? (
     <Carousel>
       {bestSellers.map((item, idx) => {

@@ -1,8 +1,12 @@
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const express = require("express");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const app = express();
-const port = 5000;
+
+const httpServer = createServer(app);
+global.io = new Server(httpServer);
 
 app.use(express.json());
 app.use(fileUpload());
@@ -39,6 +43,7 @@ app.use((error, req, res, next) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+const PORT = process.env.PORT || 5000;
+httpServer.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });
