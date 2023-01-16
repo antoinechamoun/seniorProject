@@ -14,7 +14,8 @@ import { useState } from "react";
 import { useEffect } from "react";
 
 const AdminAnalyticsPageComponent = ({
-  fetchOrdersForADate,
+  fetchOrdersForFirstDate,
+  fetchOrdersForSecondDate,
   socketIOClient,
 }) => {
   const [firstDateToCompare, setFirstDayToCompare] = useState(
@@ -38,6 +39,43 @@ const AdminAnalyticsPageComponent = ({
   };
 
   useEffect(() => {
+    fetchOrdersForFirstDate(firstDateToCompare)
+      .then((data) => {
+        let orderSum = 0;
+        console.log("1", data);
+        const orders = data.map((order) => {
+          orderSum += order.orderTotal.cartSubtotal;
+          let date = new Date(order.createdAt).toLocaleString("en-US", {
+            hour: "numeric",
+            hour12: true,
+            timeZone: "UTC",
+          });
+          return { name: date, [firstDateToCompare]: orderSum };
+        });
+        setDataForFirstSet(orders);
+      })
+      .catch((er) => console.log(er));
+
+    fetchOrdersForSecondDate(secondDateToCompare)
+      .then((data) => {
+        let orderSum = 0;
+        console.log("2", data);
+        const orders = data.map((order) => {
+          orderSum += order.orderTotal.cartSubtotal;
+          let date = new Date(order.createdAt).toLocaleString("en-US", {
+            hour: "numeric",
+            hour12: true,
+            timeZone: "UTC",
+          });
+          return { name: date, [secondDateToCompare]: orderSum };
+        });
+        setDataForSecondSet(orders);
+      })
+      .catch((er) => console.log(er));
+    // eslint-disable-next-line
+  }, [firstDateToCompare, secondDateToCompare]);
+
+  useEffect(() => {
     const socket = socketIOClient();
     let today = new Date().toDateString();
     const handler = (newOrder) => {
@@ -46,7 +84,6 @@ const AdminAnalyticsPageComponent = ({
         hour12: true,
         timeZone: "UTC",
       });
-
       if (new Date(newOrder.createdAt).toDateString() === today) {
         if (today === new Date(firstDateToCompare).toDateString()) {
           setDataForFirstSet((prev) => {
@@ -110,42 +147,8 @@ const AdminAnalyticsPageComponent = ({
     firstDateToCompare,
     secondDateToCompare,
   ]);
-
-  useEffect(() => {
-    fetchOrdersForADate(firstDateToCompare)
-      .then((data) => {
-        let orderSum = 0;
-        const orders = data.map((order) => {
-          orderSum += order.orderTotal.cartSubtotal;
-          let date = new Date(order.createdAt).toLocaleString("en-US", {
-            hour: "numeric",
-            hour12: true,
-            timeZone: "UTC",
-          });
-          return { name: date, [firstDateToCompare]: orderSum };
-        });
-        setDataForFirstSet(orders);
-      })
-      .catch((er) => console.log(er));
-
-    fetchOrdersForADate(secondDateToCompare)
-      .then((data) => {
-        let orderSum = 0;
-        const orders = data.map((order) => {
-          orderSum += order.orderTotal.cartSubtotal;
-          let date = new Date(order.createdAt).toLocaleString("en-US", {
-            hour: "numeric",
-            hour12: true,
-            timeZone: "UTC",
-          });
-          return { name: date, [secondDateToCompare]: orderSum };
-        });
-        setDataForSecondSet(orders);
-      })
-      .catch((er) => console.log(er));
-    // eslint-disable-next-line
-  }, [firstDateToCompare, secondDateToCompare]);
-
+  console.log(dataForFirstSet);
+  console.log(dataForSecondSet);
   return (
     <Row className="m-5">
       <Col md={2}>
@@ -200,6 +203,7 @@ const AdminAnalyticsPageComponent = ({
             />
             <Tooltip />
             <Legend verticalAlign="top" height={36} />
+
             {dataForFirstSet.length > dataForSecondSet.length ? (
               <>
                 <Line
@@ -211,7 +215,8 @@ const AdminAnalyticsPageComponent = ({
                 />
                 <Line
                   type="monotone"
-                  dataKey={dataForSecondSet}
+                  data={dataForSecondSet}
+                  dataKey={secondDateToCompare}
                   stroke="#82ca9d"
                 />
               </>
@@ -226,7 +231,8 @@ const AdminAnalyticsPageComponent = ({
                 />
                 <Line
                   type="monotone"
-                  dataKey={dataForFirstSet}
+                  data={dataForFirstSet}
+                  dataKey={firstDateToCompare}
                   stroke="#82ca9d"
                 />
               </>
