@@ -11,6 +11,18 @@ global.io = new Server(httpServer);
 app.use(express.json());
 app.use(fileUpload());
 app.use(cookieParser());
+
+io.on("connection", (socket) => {
+  socket.on("client sends message", (msg) => {
+    socket.broadcast.emit("server sends message from client to admin", {
+      message: msg,
+    });
+  });
+  socket.on("admin sends message", ({ message }) => {
+    socket.broadcast.emit("server sends message from admin to client", message);
+  });
+});
+
 const apiRoutes = require("./routes/apiRoutes");
 
 // mongodb connection

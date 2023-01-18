@@ -147,8 +147,6 @@ const AdminAnalyticsPageComponent = ({
     firstDateToCompare,
     secondDateToCompare,
   ]);
-  console.log(dataForFirstSet);
-  console.log(dataForSecondSet);
   return (
     <Row className="m-5">
       <Col md={2}>
