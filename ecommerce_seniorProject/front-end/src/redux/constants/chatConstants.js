@@ -1,2 +1,3 @@
 export const SET_CHAT_ROOMS = "SET_CHAT_ROOMS";
 export const SET_SOCKET = "SET_SOCKET";
+export const MESSAGE_RECEIVED = "MESSAGE_RECEIVED";
