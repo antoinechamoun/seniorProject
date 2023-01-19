@@ -1,6 +1,7 @@
 import UserOrderDetailsPageComponent from "./components/UserOrderDetailsPageComponent";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { loadScript } from "@paypal/paypal-js";
 
 const getOrder = async (orderId) => {
   const { data } = await axios.get("/api/orders/user/" + orderId);
@@ -22,6 +23,7 @@ const UserOrderDetailsPage = () => {
       userInfo={userInfo}
       getUser={getUser}
       getOrder={getOrder}
+      loadScript={loadScript}
     />
   );
 };

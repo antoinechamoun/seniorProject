@@ -9,9 +9,14 @@ import {
   Row,
 } from "react-bootstrap";
 import { useParams } from "react-router-dom";
-
+import axios from "axios";
 import CartItemComponent from "../../../components/CartItemComponent";
-const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
+const UserOrderDetailsPageComponent = ({
+  userInfo,
+  getUser,
+  getOrder,
+  loadScript,
+}) => {
   const [userAddress, setUserAddress] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("");
   const [isPaid, setIsPaid] = useState(false);
@@ -68,6 +73,11 @@ const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
     // eslint-disable-next-line
   }, []);
 
+  const updateOrder = async (orderId) => {
+    const { data } = await axios.put("/api/orders/paid" + orderId);
+    return data;
+  };
+
   const orderHandler = () => {
     setButtonDisabled(true);
     if (paymentMethod === "pp") {
@@ -75,6 +85,60 @@ const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
         "To pay for your order click one of the buttons below"
       );
       if (!isPaid) {
+        loadScript({
+          "client-id":
+            "AbhlMqTdbfjdew9p1RaZnfTCSPA1orXZQr2xSmnVK1xUK34S9pfOqk4SbY-QUINkdnn7DpjtXRBviaZj",
+        })
+          .then((paypal) => {
+            paypal
+              .Buttons({
+                createOrder: function (data, actions) {
+                  return actions.order.create({
+                    purchase_units: [
+                      {
+                        amount: {
+                          value: cartSubtotal,
+                          breakdown: {
+                            currency_code: "USD",
+                            value: cartSubtotal,
+                          },
+                        },
+                        items: cartItems.map((product) => {
+                          return {
+                            name: product.name,
+                            unit_amount: {
+                              currency_code: "USD",
+                              value: product.price,
+                            },
+                            quantity: product.quantity,
+                          };
+                        }),
+                      },
+                    ],
+                  });
+                },
+                onApprove: function (data, actions) {
+                  return actions.order.capture().then((orderData) => {
+                    let transaction =
+                      orderData.purchase_units[0].payments.captures[0];
+                    if (
+                      transaction.status === "COMPLETED" &&
+                      Number(transaction.amount.value) === Number(cartSubtotal)
+                    ) {
+                      updateOrder(id).then((data) => {
+                        if (data.isPaid) {
+                          setOrderButtonMessage("Thank you for your payment!");
+                          setIsPaid(data.paidAt);
+                          setButtonDisabled(true);
+                        }
+                      });
+                    }
+                  });
+                },
+              })
+              .render("#paypal-container-element");
+          })
+          .catch((er) => console.log(er));
       }
     } else {
       setOrderButtonMessage("Your order was placed. Thank you");
@@ -165,6 +229,7 @@ const UserOrderDetailsPageComponent = ({ userInfo, getUser, getOrder }) => {
                   {orderButtonMessage}
                 </Button>
               </div>
+              <div id="paypal-container-element"></div>
             </ListGroup.Item>
           </ListGroup>
         </Col>
