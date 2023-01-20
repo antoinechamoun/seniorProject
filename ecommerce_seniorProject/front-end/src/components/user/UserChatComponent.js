@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useEffect } from "react";
 import socketIOClient from "socket.io-client";
 import { useSelector } from "react-redux";
+import ChatBotMsg from "./utils/ChatBot";
 
 const UserChatComponent = () => {
   const [socket, setSocket] = useState(false);
   const [chat, setChat] = useState([]);
   const [messageReceived, setMessageReceived] = useState(false);
+  const [isChatbot, setIsChatbot] = useState(true);
 
   const userInfo = useSelector((state) => state.userRegisterLogin.userInfo);
 
@@ -62,37 +64,46 @@ const UserChatComponent = () => {
         <div className="chat-header">
           <h6>Let's Chat - Online</h6>
         </div>
-        <div className="chat-form">
-          <div className="chat-msg">
-            {chat.map((item, id) => {
-              return (
-                <div key={id}>
-                  {item.client && (
-                    <p>
-                      <b>You wrote:</b>
-                      {item.client}
-                    </p>
-                  )}
-                  {item.admin && (
-                    <p className="bg-primary p-3 ms-4 text-light rounded-pill">
-                      <b>Support wrote:</b>
-                      {item.admin}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+        {isChatbot ? (
+          <ChatBotMsg
+            setIsChatbot={setIsChatbot}
+            chat={chat}
+            setChat={setChat}
+            socket={socket}
+          />
+        ) : (
+          <div className="chat-form">
+            <div className="chat-msg">
+              {chat.map((item, id) => {
+                return (
+                  <div key={id}>
+                    {item.client && (
+                      <p>
+                        <b>You wrote:</b>
+                        {item.client}
+                      </p>
+                    )}
+                    {item.admin && (
+                      <p className="bg-primary p-3 ms-4 text-light rounded-pill">
+                        <b>Support wrote:</b>
+                        {item.admin}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <textarea
+              onKeyUp={(e) => {
+                clientSubmitChatMsg(e);
+              }}
+              id="clientChatMsg"
+              placeholder="Your Text Message"
+              className="form-control"
+            ></textarea>
+            <button className="btn btn-success btn-block">Submit</button>
           </div>
-          <textarea
-            onKeyUp={(e) => {
-              clientSubmitChatMsg(e);
-            }}
-            id="clientChatMsg"
-            placeholder="Your Text Message"
-            className="form-control"
-          ></textarea>
-          <button className="btn btn-success btn-block">Submit</button>
-        </div>
+        )}
       </div>
     </div>
   ) : null;

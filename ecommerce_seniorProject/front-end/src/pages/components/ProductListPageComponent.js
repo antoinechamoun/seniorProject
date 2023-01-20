@@ -64,6 +64,7 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
   }, [categoryName, pageNumParam, searchQuery, filters, sortOption]);
 
   const handleFilters = () => {
+    console.log(location.pathname);
     navigate(location.pathname.replace(/\/[0-9]+$/, ""));
     setShowResetFiltersButton(true);
     setFilters({
@@ -147,6 +148,8 @@ const ProductListPageComponent = ({ getProducts, categories }) => {
             <h1>Loading products...</h1>
           ) : error ? (
             <h1>An error occurred while loading products. Try again later.</h1>
+          ) : products.length === 0 ? (
+            <h1>No available products...</h1>
           ) : (
             products.map((product) => {
               return (
